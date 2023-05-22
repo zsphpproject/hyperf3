@@ -110,7 +110,7 @@ abstract class Pojo implements Arrayable {
         foreach ($properties as $property) {
             $propertySnakeName = Str::snake($property->getName());
             if (isset($inputData[$propertySnakeName])) {
-                $propertyValue = ($inputData[$propertySnakeName] && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
+                $propertyValue = $inputData[$propertySnakeName] != "" ? $inputData[$propertySnakeName] : $property->getDefaultValue();
                 $propertyName = $property->getName();
                 $setDataFuncName = 'set' . ucfirst($propertyName);
                 if (!$this->reflectionClass->hasMethod($setDataFuncName)) {
