@@ -64,9 +64,6 @@ class ClientRequest {
             $error2 = json_decode($error2,true);
             Log::get("guzzle_response")->info("{$path}求失败:" . $error2["message"],["request_id" => $request_id]);
             throw new AppException(ErrorNums::SERVER_ERROR,$error2["message"] ?? "请求应用未知错误");
-            // $error = $exception->getMessage();
-            // Log::get("guzzle_response")->info("{$path}求失败:" . $error,["request_id" => $request_id]);
-            // throw new AppException(ErrorNums::SERVER_ERROR,$error);
         }
     }
 
