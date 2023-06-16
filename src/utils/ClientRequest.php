@@ -59,11 +59,12 @@ class ClientRequest {
             }
         }catch (GuzzleException $exception){
             $error = $exception->getMessage();
-            $str = "Client error: `POST ".env("SHOP_BASE_URL") . $path ."` resulted in a `".$exception->getCode()." Bad Request` response:";
+            $str = "Client error: `POST ". \Hyperf\Utils\Str::replace("/index.php","",env("SHOP_BASE_URL")) . $path ."` resulted in a `".$exception->getCode()." Bad Request` response:";
             $error2 = Str::replace($str,"",$error);
+            $error2 = trim($error2);
             $error2 = json_decode($error2,true);
-            Log::get("guzzle_response")->info("{$path}求失败:" . $error2["message"],["request_id" => $request_id]);
-            throw new AppException(ErrorNums::SERVER_ERROR,$error2["message"] ?? "请求应用未知错误");
+            Log::get("guzzle_response")->info("{$path}求失败:" . $error2["message"] ?? $error,["request_id" => $request_id]);
+            throw new AppException(ErrorNums::SERVER_ERROR,$error2["message"] ?? "请求应用未知错误:".$error);
         }
     }
 
