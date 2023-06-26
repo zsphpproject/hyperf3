@@ -41,6 +41,10 @@ class RedisUtil {
         return $this->redis->del($key);
     }
 
+    public function ttl(string $key) : mixed {
+        return $this->redis->ttl($key);
+    }
+
 
     /**
      * list操作
