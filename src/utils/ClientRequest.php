@@ -42,6 +42,7 @@ class ClientRequest {
             $res = json_decode($response->getBody()->getContents(),true);
             Log::get("guzzle_response")->info(json_encode($res,JSON_UNESCAPED_UNICODE),["request_id" => $request_id]);
 
+
             if ($response->getStatusCode() == 200){
                 if (isset($res["code"]) && $res["code"] != 0) {
                     Log::get("guzzle_response")->info("{$path}请求错误:" . $res["msg"],["request_id" => $request_id]);
@@ -54,17 +55,16 @@ class ClientRequest {
                 return $res["data"];
             }else{
                 $message = $response->getBody()->getContents();
+                // $message = $res["message"];
                 Log::get("guzzle_response")->info("{$path}请求失败:" . $message,["request_id" => $request_id]);
                 throw new AppException(ErrorNums::SERVER_ERROR,$message);
             }
         }catch (GuzzleException $exception){
             $error = $exception->getMessage();
-            $str = "Client error: `POST ". \Hyperf\Utils\Str::replace("/index.php","",env("SHOP_BASE_URL")) . $path ."` resulted in a `".$exception->getCode()." Bad Request` response:";
-            $error2 = Str::replace($str,"",$error);
-            $error2 = trim($error2);
-            $error2 = json_decode($error2,true);
-            Log::get("guzzle_response")->info("{$path}求失败:" . $error2["message"] ?? $error,["request_id" => $request_id]);
-            throw new AppException(ErrorNums::SERVER_ERROR,$error2["message"] ?? "请求应用未知错误:".$error);
+            print_r($error);
+
+            Log::get("guzzle_response")->info("{$path}求失败:" . $error,["request_id" => $request_id]);
+            throw new AppException(ErrorNums::SERVER_ERROR,"请求应用未知错误:".$error);
         }
     }
 
