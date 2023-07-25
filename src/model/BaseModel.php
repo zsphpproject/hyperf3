@@ -3,6 +3,8 @@
 namespace Zsgogo\model;
 
 use App\common\constant\Common;
+use Hyperf\Contract\LengthAwarePaginatorInterface;
+use Hyperf\Database\Model\Builder;
 use Hyperf\Database\Model\Collection;
 use Hyperf\DbConnection\Model\Model;
 use Hyperf\Paginator\Paginator;
@@ -10,22 +12,33 @@ use Hyperf\Paginator\Paginator;
 class BaseModel extends Model {
 
     /**
-     * 返回list
+     * 返回list/分页list 默认分页
      * @param array $param
      * @param array $where
      * @param array $allowFields
      * @param array $with
-     * @return Collection|array
+     * @param int $noPaging
+     * @return LengthAwarePaginatorInterface|Builder[]|Collection
      */
-    public function getList(array $param,array $where, array $allowFields,array $with = []): Collection|array {
+    public function getList(array $param,array $where, array $allowFields,array $with = [],int $noPaging = 0): Collection|array|LengthAwarePaginatorInterface {
         $param["sort"] = $param["sort"] ?? "";
         // $order = Common::getSort($param["sort"]) . "," . $this->primaryKey . " desc";
         $order = Common::getSort($param["sort"]);
-        return self::where($where)
-            ->with($with)
-            ->orderByRaw($order)
-            ->select($allowFields)
-            ->get();
+
+        if ($noPaging == 1){
+            return self::where($where)
+                ->with($with)
+                ->orderByRaw($order)
+                ->select($allowFields)
+                ->get();
+        }else{
+            return self::where($where)
+                ->with($with)
+                ->orderByRaw($order)
+                ->select($allowFields)
+                ->paginate($param["size"]);
+        }
+
     }
 
     /**
