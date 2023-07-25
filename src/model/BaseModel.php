@@ -35,8 +35,8 @@ class BaseModel extends Model {
      * @return Paginator
      */
     public function getPageList(Collection|array $collection, array $param): Paginator {
-        $collection = new Collection($collection->toArray());
-        $list = $collection->forPage((int)$param["page"], (int)$param["size"])->toArray();
+        if (is_array($collection)) $collection = new Collection($collection);
+        $list = array_values($collection->forPage((int)$param["page"], (int)$param["size"])->toArray());
         return new Paginator($list,(int)$param["size"],(int)$param["page"]);
     }
 }
