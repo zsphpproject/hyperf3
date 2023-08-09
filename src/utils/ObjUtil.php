@@ -23,6 +23,7 @@ class ObjUtil {
         foreach ($properties as $property){
             $propertySnakeName = $property->getName();
             $propertyValue = (isset($inputData[$propertySnakeName]) && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
+            if ($propertyValue == null) continue;
             $propertyName = $property->getName();
             $setDataFuncName = 'set' . $this->toHump($propertyName);
             if (!$reflection->hasMethod($setDataFuncName)) {
