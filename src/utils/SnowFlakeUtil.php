@@ -3,6 +3,7 @@
 namespace Zsgogo\utils;
 
 use Godruoyi\Snowflake\Snowflake;
+use Hyperf\Context\Context;
 
 class SnowFlakeUtil {
 
@@ -20,6 +21,7 @@ class SnowFlakeUtil {
         $snowflake = new Snowflake($this->datacenterId,$this->workId);
         $id = $snowflake->id();
         $this->currentId = Date("Ymd").$id;
+        Context::set("request_id",$this->currentId);
         return $this->currentId;
     }
 
