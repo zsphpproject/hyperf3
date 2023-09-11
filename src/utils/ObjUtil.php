@@ -3,6 +3,7 @@
 namespace Zsgogo\utils;
 
 use App\common\constant\ErrorNums;
+use Hyperf\Stringable\Str;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
@@ -24,6 +25,11 @@ class ObjUtil {
             $propertySnakeName = $property->getName();
             $propertyValue = (isset($inputData[$propertySnakeName]) && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
             // if ($propertyValue == null) continue;
+
+            if ($propertyValue == null && Str::contains($property->getDocComment(),"int32")) {
+                $propertyValue = 0;
+            }
+
             $propertyName = $property->getName();
             $setDataFuncName = 'set' . $this->toHump($propertyName);
             if (!$reflection->hasMethod($setDataFuncName)) {
