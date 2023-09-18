@@ -3,6 +3,7 @@
 namespace Zsgogo\utils;
 
 use App\common\constant\ErrorNums;
+use Hyperf\Context\Context;
 
 
 class ResponseJson {
@@ -16,7 +17,8 @@ class ResponseJson {
         return [
             "code" => ErrorNums::SUCCESS,
             "msg" => $msg,
-            "request_id" => SnowFlakeUtil::getInstance()->getCurrentId(),
+            // "request_id" => SnowFlakeUtil::getInstance()->getCurrentId(),
+            "request_id" => Context::get("request_id"),
             "data" => $data
         ];
     }
@@ -31,7 +33,8 @@ class ResponseJson {
         return [
             "code" => $code,
             "msg" => $msg ?: ErrorNums::getInstance()->getMessage($code),
-            "request_id" => SnowFlakeUtil::getInstance()->getCurrentId(),
+            // "request_id" => SnowFlakeUtil::getInstance()->getCurrentId(),
+            "request_id" => Context::get("request_id"),
             "data" => $data
         ];
 
@@ -44,6 +47,7 @@ class ResponseJson {
     //         "code" => ErrorNums::Unauthorized,
     //         "msg" => $msg,
     //         "request_id" => SnowFlakeUtil::getInstance()->getCurrentId(),
+    //             "request_id" => Context::get("request_id"),
     //         "data" => null
     //     ],"json",$statusCode);
     // }

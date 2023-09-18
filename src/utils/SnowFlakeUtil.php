@@ -12,7 +12,7 @@ class SnowFlakeUtil {
     protected $workId = 0;
     protected $currentId = "";
 
-    private function __construct() {}
+    public function __construct() {}
 
     private function __clone() {}
 
