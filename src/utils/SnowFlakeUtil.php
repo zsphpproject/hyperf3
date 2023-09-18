@@ -14,7 +14,7 @@ class SnowFlakeUtil {
 
     public function __construct() {}
 
-    private function __clone() {}
+    // private function __clone() {}
 
 
     public function createId(): string {
