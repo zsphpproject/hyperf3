@@ -69,5 +69,42 @@ class ClientRequest {
     }
 
 
+    /**
+     * 重写send方法
+     * @param string $baseurl
+     * @param string $path
+     * @param string $method
+     * @param array $param
+     * @param array $headers
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function request(string $baseurl,string $path = "",string $method = "post",array $param = [],array $headers = []): mixed {
+        $client = new Client([
+            "base_uri" => $baseurl,
+            "timeout" => 5.0
+        ]);
+
+        $option[RequestOptions::JSON] = [];
+        if (!empty($param)) $option[RequestOptions::JSON] = $param;
+        if (!empty($headers)) $option[RequestOptions::HEADERS] = $headers;
+
+        Log::get("guzzle_request")->info(json_encode($option,JSON_UNESCAPED_UNICODE),["request_id" => $param["request_id"] ?? ""]);
+
+        try {
+            $response = $client->request($method, $path, $option);
+            $res = json_decode($response->getBody()->getContents(),true);
+            Log::get("guzzle_response")->info(json_encode($res,JSON_UNESCAPED_UNICODE),["request_id" => $param["request_id"] ?? ""]);
+
+            return $res;
+
+        }catch (GuzzleException $exception){
+            $error = $exception->getMessage();
+            Log::get("guzzle_response")->info("{$path}求失败:" . $error,["request_id" => $param["request_id"] ?? ""]);
+            throw new AppException(ErrorNums::SERVER_ERROR,"请求应用未知错误:".$error);
+        }
+    }
+
 
 }
