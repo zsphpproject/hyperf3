@@ -30,6 +30,7 @@ class ResponseJson {
      * @return array
      */
     public static function fail(int $code = ErrorNums::SYS_ERROR,string $msg = "",$data = null): array {
+        if ($code == ErrorNums::DB_ERROR && \Hyperf\Support\env("APP_ENV") == "prod") $msg = "";
         return [
             "code" => $code,
             "msg" => $msg ?: ErrorNums::getInstance()->getMessage($code),

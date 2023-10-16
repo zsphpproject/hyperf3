@@ -15,4 +15,12 @@ class AesUtil
     public static function decrypt(string $encrypt,string $key){
         return openssl_decrypt($encrypt, 'AES-256-ECB', $key, 0);
     }
+
+    public function desEncrypt(string $context,string $key) {
+        return openssl_encrypt($context, 'DES-ECB', $key, 0);
+    }
+
+    public function desDecrypt(string $encrypt,string $key) {
+        return openssl_decrypt($encrypt, 'DES-ECB', $key, 0);
+    }
 }
