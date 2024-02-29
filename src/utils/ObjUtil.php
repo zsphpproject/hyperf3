@@ -78,9 +78,6 @@ class ObjUtil
         foreach ($properties as $property) {
             $propertySnakeName = $property->getName();
             $propertyValue = (isset($inputData[$propertySnakeName]) && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
-//            if (!is_scalar($propertyValue) && !is_null($propertyValue)) {
-//                var_dump($property->getDocComment());
-//            }
             if ($propertyValue == null && Str::contains($property->getDocComment(), ['int32', 'float'])) {
                 if (!Str::contains($property->getDocComment(), ['repeated'])) {
                     $propertyValue = 0;
