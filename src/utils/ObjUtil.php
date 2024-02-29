@@ -4,9 +4,18 @@ namespace Zsgogo\utils;
 
 use App\common\constant\ErrorNums;
 use Hyperf\Stringable\Str;
+use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Tags\Param;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Type;
+use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionNamedType;
 use ReflectionProperty;
+use Zsgogo\exception\AppException;
 
 class ObjUtil
 {
@@ -84,6 +93,30 @@ class ObjUtil
             $reflectionMethod = $reflection->getMethod($setDataFuncName);
             if (!$reflectionMethod->isPublic()) {
                 continue;
+            }
+            $docBlockFactory = DocBlockFactory::createInstance();
+            $docBlock = $docBlockFactory->create($reflectionMethod);
+            foreach ($docBlock->getTagsByName('param') as $paramTag) {
+                /**
+                 *
+                 * @var Param $paramTag
+                 */
+                if ($paramTag->getType() instanceof Compound) {
+                    /**
+                     * @var ?Array_ $a
+                     */
+                    $a = $paramTag->getType()->get(0);
+                    if ($a->getValueType() instanceof Object_) {
+                        $obj = $a->getValueType()->getFqsen()->__toString();
+                        if (is_array($propertyValue)) {
+                            foreach ($propertyValue as &$item) {
+                                $tmp = new $obj();
+                                $this->setDataV2($tmp, $item);
+                                $item = $tmp;
+                            }
+                        }
+                    }
+                }
             }
             $reflectionMethod->invokeArgs($response, [$propertyValue]);
         }
