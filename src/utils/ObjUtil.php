@@ -7,9 +7,9 @@ use Hyperf\Stringable\Str;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
-use Zsgogo\exception\AppException;
 
-class ObjUtil {
+class ObjUtil
+{
 
     /**
      * 对象设置成员变量
@@ -18,26 +18,27 @@ class ObjUtil {
      * @return void
      * @throws ReflectionException
      */
-    public function setData(object $response, array $inputData): void {
+    public function setData(object $response, array $inputData): void
+    {
         $reflection = new ReflectionClass($response);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PROTECTED);
-        foreach ($properties as $property){
+        foreach ($properties as $property) {
             $propertySnakeName = $property->getName();
             $propertyValue = (isset($inputData[$propertySnakeName]) && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
-            // if ($propertyValue == null) continue;
 
-            if ($propertyValue == null && Str::contains($property->getDocComment(),"int32")) {
+            if ($propertyValue == null && Str::contains($property->getDocComment(), "int32")) {
                 $propertyValue = 0;
             }
 
             $propertyName = $property->getName();
             $setDataFuncName = 'set' . $this->toHump($propertyName);
             if (!$reflection->hasMethod($setDataFuncName)) {
-                throw new AppException(ErrorNums::METHOD_NOT_EXISTS,'method ' . $reflection->getName() . '::' . $setDataFuncName . ' not exists!');
+                // not found setXxx method continue.
+                continue;
             }
             $reflectionMethod = $reflection->getMethod($setDataFuncName);
             if (!$reflectionMethod->isPublic()) {
-                throw new AppException(ErrorNums::METHOD_NOT_PUBLIC,'method ' . $reflection->getName() . '::' . $setDataFuncName . ' is not public!');
+                continue;
             }
             $reflectionMethod->invokeArgs($response, [$propertyValue]);
         }
@@ -48,8 +49,43 @@ class ObjUtil {
      * @param string $str
      * @return string
      */
-    public function toHump(string $str): string {
+    public function toHump(string $str): string
+    {
         $value = ucwords(str_replace(['-', '_'], ' ', $str));
         return str_replace(' ', '', $value);
+    }
+
+    /**
+     * 对象设置成员变量
+     * @param object $response
+     * @param array $inputData
+     * @return void
+     * @throws ReflectionException
+     */
+    public function setDataV2(object $response, array $inputData): void
+    {
+        $reflection = new ReflectionClass($response);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PRIVATE);
+        foreach ($properties as $property) {
+            $propertySnakeName = $property->getName();
+            $propertyValue = (isset($inputData[$propertySnakeName]) && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
+            if ($propertyValue == null && Str::contains($property->getDocComment(), ['int32', 'float'])) {
+                if (!Str::contains($property->getDocComment(), ['repeated'])) {
+                    $propertyValue = 0;
+                }
+            }
+
+            $propertyName = $property->getName();
+            $setDataFuncName = 'set' . $this->toHump($propertyName);
+            if (!$reflection->hasMethod($setDataFuncName)) {
+                // not found setXxx method continue.
+                continue;
+            }
+            $reflectionMethod = $reflection->getMethod($setDataFuncName);
+            if (!$reflectionMethod->isPublic()) {
+                continue;
+            }
+            $reflectionMethod->invokeArgs($response, [$propertyValue]);
+        }
     }
 }
