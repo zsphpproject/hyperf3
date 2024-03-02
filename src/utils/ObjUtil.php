@@ -103,25 +103,25 @@ class ObjUtil
                  */
                 if ($paramTag->getType() instanceof Compound) {
                     /**
-                     * @var ?Array_ $a
+                     * @var ?Array_ $paramType
                      */
-                    $a = $paramTag->getType()->get(0);
-                    if ($a->getValueType() instanceof Object_) {
-                        $obj = $a->getValueType()->getFqsen()->__toString();
+                    $paramType = $paramTag->getType()->get(0);
+                    if ($paramType->getValueType() instanceof Object_) {
+                        $obj = $paramType->getValueType()->getFqsen()->__toString();
                         if (is_array($propertyValue)) {
                             foreach ($propertyValue as &$item) {
-                                $tmp = new $obj();
-                                $this->setDataV2($tmp, $item);
-                                $item = $tmp;
+                                $paramObj = new $obj();
+                                $this->setDataV2($paramObj, $item);
+                                $item = $paramObj;
                             }
                         }
                     }
                 } else if ($paramTag->getType() instanceof Object_) {
                     // Obj 格式
                     $obj = $paramTag->getType()->getFqsen()->__toString();
-                    $tmp = new $obj();
-                    $this->setDataV2($tmp, $propertyValue);
-                    $propertyValue = $tmp;
+                    $paramObj = new $obj();
+                    $this->setDataV2($paramObj, $propertyValue);
+                    $propertyValue = $paramObj;
                 }
             }
             $reflectionMethod->invokeArgs($response, [$propertyValue]);
