@@ -98,7 +98,7 @@ class ObjUtil
             $docBlock = $docBlockFactory->create($reflectionMethod);
             foreach ($docBlock->getTagsByName('param') as $paramTag) {
                 /**
-                 * []Obj 格式
+                 * Obj[] 格式
                  * @var Param $paramTag
                  */
                 if ($paramTag->getType() instanceof Compound) {
@@ -117,7 +117,9 @@ class ObjUtil
                         }
                     }
                 } else if ($paramTag->getType() instanceof Object_) {
-                    // Obj 格式
+                    /**
+                     * Obj 格式
+                     */
                     $obj = $paramTag->getType()->getFqsen()->__toString();
                     $paramObj = new $obj();
                     $this->setDataV2($paramObj, $propertyValue);
