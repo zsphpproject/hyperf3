@@ -2,7 +2,6 @@
 
 namespace Zsgogo\utils;
 
-use App\common\constant\ErrorNums;
 use Hyperf\Stringable\Str;
 use phpDocumentor\Reflection\DocBlock\Tag;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
@@ -13,12 +12,9 @@ use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Object_;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionNamedType;
 use ReflectionProperty;
-use Zsgogo\exception\AppException;
 
-class ObjUtil
-{
+class ObjUtil {
 
     /**
      * 对象设置成员变量
@@ -27,15 +23,14 @@ class ObjUtil
      * @return void
      * @throws ReflectionException
      */
-    public function setData(object $response, array $inputData): void
-    {
+    public function setData(object $response, array $inputData): void {
         $reflection = new ReflectionClass($response);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PROTECTED);
         foreach ($properties as $property) {
             $propertySnakeName = $property->getName();
             $propertyValue = (isset($inputData[$propertySnakeName]) && $inputData[$propertySnakeName] != "") ? $inputData[$propertySnakeName] : $property->getDefaultValue();
 
-            if ($propertyValue == null && Str::contains($property->getDocComment(), "int32")) {
+            if ($propertyValue == null && Str::contains($property->getDocComment(), ['int32', 'float'])) {
                 $propertyValue = 0;
             }
 
@@ -58,8 +53,7 @@ class ObjUtil
      * @param string $str
      * @return string
      */
-    public function toHump(string $str): string
-    {
+    public function toHump(string $str): string {
         $value = ucwords(str_replace(['-', '_'], ' ', $str));
         return str_replace(' ', '', $value);
     }
@@ -71,8 +65,7 @@ class ObjUtil
      * @return void
      * @throws ReflectionException
      */
-    public function setDataV2(object $response, array $inputData): void
-    {
+    public function setDataV2(object $response, array $inputData): void {
         $reflection = new ReflectionClass($response);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PRIVATE);
         foreach ($properties as $property) {
