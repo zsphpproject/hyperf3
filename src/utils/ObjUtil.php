@@ -83,6 +83,9 @@ class ObjUtil
                     $propertyValue = 0;
                 }
             }
+            if (is_null($propertyValue)) {
+                continue;
+            }
 
             $propertyName = $property->getName();
             $setDataFuncName = 'set' . $this->toHump($propertyName);
