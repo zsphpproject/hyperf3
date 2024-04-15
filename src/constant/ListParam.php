@@ -4,40 +4,39 @@ namespace Zsgogo\constant;
 
 trait ListParam {
 
-    private int|string $page = 1;
+    private int $page = 1;
 
-    private int|string $size = Common::DEFAULT_SIZE;
+    private int $size = Common::DEFAULT_SIZE;
 
     private string $sort = "";
 
     /**
-     * @return int|string
+     * @return int
      */
-    public function getPage(): int|string {
+    public function getPage(): int {
         return $this->page;
     }
 
     /**
-     * @param int|string $page
+     * @param int $page
      */
-    public function setPage(int|string $page): void {
+    public function setPage(int $page): void {
         $this->page = $page;
     }
 
     /**
-     * @return int|string
+     * @return int
      */
-    public function getSize(): int|string {
+    public function getSize(): int {
         return $this->size;
     }
 
     /**
-     * @param int|string $size
+     * @param int $size
      */
-    public function setSize(int|string $size): void {
+    public function setSize(int $size): void {
         $this->size = $size;
     }
-
 
     /**
      * @return string
@@ -52,5 +51,4 @@ trait ListParam {
     public function setSort(string $sort): void {
         $this->sort = $sort;
     }
-
 }
