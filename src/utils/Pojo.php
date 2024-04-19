@@ -11,57 +11,46 @@ use ReflectionClass;
 use ReflectionProperty;
 use App\common\constant\ErrorNums;
 use RuntimeException;
-use Zsgogo\exception\AppException;
 
 
 abstract class Pojo implements Arrayable
 {
 
     /**
-     * @var array $data 数据
-     */
-    private $data = [];
-
-    /**
      * @var ReflectionClass
      */
-    private $reflectionClass;
+    private ReflectionClass $reflectionClass;
 
     /**
      * @var array the keys to identify the data of request in coroutine context
      */
-    protected array $contextkeys
+    protected array $contextKeys
         = [
-            'parsedData' => 'http.request.parsedData',
+            'parsedData' => 'pojo.parsedData',
         ];
 
-    public function __construct(array $param = [])
+    public function __construct()
     {
-        $inputData = $this->getInputData();
-        if (!empty($param)) {
-            $inputData = array_merge($inputData, $param);
-        }
         $this->reflectionClass = new ReflectionClass($this);
-        $this->setData($inputData);
     }
 
     /**
+     * 根据对象设置的属性转为数组
      * @return array
      */
     public function toArray(): array
     {
+        $data = [];
         $properties = $this->reflectionClass->getProperties(ReflectionProperty::IS_PRIVATE);
         foreach ($properties as $property) {
             $propertySnakeName = Str::snake($property->getName());
-            if (!isset($this->data[$propertySnakeName])) {
-                $getter = \Hyperf\Support\getter($propertySnakeName);
-                $this->data[$propertySnakeName] = $this->$getter();
-            }
+            $data[$propertySnakeName] = $this->input($propertySnakeName);
         }
-        return $this->data;
+        return $data;
     }
 
     /**
+     * 原始入参，可能会包含merge的数据
      * @return array
      */
     public function all(): array
@@ -70,47 +59,56 @@ abstract class Pojo implements Arrayable
     }
 
     /**
-     * @throws AppException
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
      */
-    private function setData($inputData): void
+    public function input(string $key, mixed $default = null): mixed
     {
-        $properties = $this->reflectionClass->getProperties(ReflectionProperty::IS_PRIVATE);
-        foreach ($properties as $property) {
-            $propertySnakeName = Str::snake($property->getName());
-            if (isset($inputData[$propertySnakeName])) {
-                $propertyValue = $inputData[$propertySnakeName] != "" ? $inputData[$propertySnakeName] : $property->getDefaultValue();
-                $property->setValue($this, $propertyValue);
-                $this->data[$propertySnakeName] = $propertyValue;
-            }
+        $data = $this->getInputData();
+        return \Hyperf\Collection\data_get($data, $key, $default);
+    }
+
+    /**
+     * 将另外一个数字合并到该对象中
+     * @param array $mergeData
+     * @return void
+     */
+    public function mergeData(array $mergeData): void
+    {
+        $this->updateParsedData($mergeData);
+    }
+
+    /**
+     * getter / setter
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public function __call($name, $arguments)
+    {
+        if (Str::startsWith($name, 'get')) {
+            return $this->input(Str::snake(Str::after($name, 'get')));
         }
+        if (Str::startsWith($name, 'set')) {
+            $this->updateParsedData(Str::snake(Str::after($name, 'set')), ...$arguments);
+            return true;
+        }
+        throw new RuntimeException($name. ' Method not exist.');
     }
 
     /**
      * @return ServerRequestInterface
      */
-    protected function getRequest(): ServerRequestInterface
+    private function getRequest(): ServerRequestInterface
     {
         return Context::get(ServerRequestInterface::class);
     }
 
     /**
-     * @param $name
-     * @param $arguments
-     * @return mixed
-     */
-    protected function call($name, $arguments)
-    {
-        $request = $this->getRequest();
-        if (! method_exists($request, $name)) {
-            throw new RuntimeException('Method not exist.');
-        }
-        return $request->{$name}(...$arguments);
-    }
-
-    /**
      * @return array
      */
-    protected function getInputData(): array
+    private function getInputData(): array
     {
         return $this->storeParsedData(function () {
             $request = $this->getRequest();
@@ -127,11 +125,28 @@ abstract class Pojo implements Arrayable
      * @param callable $callback
      * @return mixed
      */
-    protected function storeParsedData(callable $callback): mixed
+    private function storeParsedData(callable $callback): mixed
     {
-        if (! Context::has($this->contextkeys['parsedData'])) {
-            return Context::set($this->contextkeys['parsedData'], $callback());
+        if (!Context::has($this->contextKeys['parsedData'])) {
+            return Context::set($this->contextKeys['parsedData'], $callback());
         }
-        return Context::get($this->contextkeys['parsedData']);
+        return Context::get($this->contextKeys['parsedData']);
+    }
+
+    /**
+     * @param mixed $key
+     * @param mixed|null $data
+     * @return void
+     */
+    private function updateParsedData(mixed $key, mixed $data = null): void
+    {
+        Context::override($this->contextKeys['parsedData'], function ($old)use ($key, $data) {
+            if (is_array($key)) {
+                $updateData = $key;
+            } else {
+                $updateData = [$key => $data];
+            }
+            return array_merge($old ?? [], $updateData);
+        });
     }
 }
