@@ -44,7 +44,12 @@ abstract class Pojo implements Arrayable
         $properties = $this->reflectionClass->getProperties(ReflectionProperty::IS_PRIVATE);
         foreach ($properties as $property) {
             $propertySnakeName = Str::snake($property->getName());
-            $data[$propertySnakeName] = $this->input($propertySnakeName);
+            $inputData = $this->input($propertySnakeName);
+            if ('' === $inputData) {
+                $data[$propertySnakeName] = $property->getDefaultValue();
+            } else {
+                $data[$propertySnakeName] = $inputData;
+            }
         }
         return $data;
     }
@@ -88,7 +93,14 @@ abstract class Pojo implements Arrayable
     public function __call($name, $arguments)
     {
         if (Str::startsWith($name, 'get')) {
-            return $this->input(Str::snake(Str::after($name, 'get')));
+            $funcName = Str::after($name, 'get');
+            $value = $this->input(Str::snake(Str::after($name, 'get')));
+            if ('' === $value) {
+                $defaultValue = $this->reflectionClass->getProperty(lcfirst($funcName))->getDefaultValue();
+                $this->updateParsedData(Str::snake($funcName), $defaultValue);
+                return $defaultValue;
+            }
+            return $value;
         }
         if (Str::startsWith($name, 'set')) {
             $this->updateParsedData(Str::snake(Str::after($name, 'set')), ...$arguments);
