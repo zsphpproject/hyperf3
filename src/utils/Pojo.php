@@ -4,16 +4,16 @@ declare(strict_types=1);
 namespace Zsgogo\utils;
 
 use Hyperf\Context\Context;
-use Hyperf\Contract\Arrayable;
 use Hyperf\Stringable\Str;
-use Psr\Http\Message\ServerRequestInterface;
+use Hyperf\Validation\Request\FormRequest;
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionProperty;
 use App\common\constant\ErrorNums;
 use RuntimeException;
 
-
-abstract class Pojo implements Arrayable
+abstract class Pojo extends FormRequest
 {
 
     /**
@@ -24,14 +24,15 @@ abstract class Pojo implements Arrayable
     /**
      * @var array the keys to identify the data of request in coroutine context
      */
-    protected array $contextKeys
+    protected array $contextkeys
         = [
             'parsedData' => 'pojo.parsedData',
         ];
 
-    public function __construct()
+    public function __construct(protected ContainerInterface $container)
     {
         $this->reflectionClass = new ReflectionClass($this);
+        parent::__construct($container);
     }
 
     /**
@@ -55,26 +56,6 @@ abstract class Pojo implements Arrayable
     }
 
     /**
-     * 原始入参，可能会包含merge的数据
-     * @return array
-     */
-    public function all(): array
-    {
-        return $this->getInputData();
-    }
-
-    /**
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
-     */
-    public function input(string $key, mixed $default = null): mixed
-    {
-        $data = $this->getInputData();
-        return \Hyperf\Collection\data_get($data, $key, $default);
-    }
-
-    /**
      * 将另外一个数字合并到该对象中
      * @param array $mergeData
      * @return void
@@ -89,6 +70,7 @@ abstract class Pojo implements Arrayable
      * @param $name
      * @param $arguments
      * @return mixed
+     * @throws ReflectionException
      */
     public function __call($name, $arguments)
     {
@@ -96,9 +78,7 @@ abstract class Pojo implements Arrayable
             $funcName = Str::after($name, 'get');
             $value = $this->input(Str::snake(Str::after($name, 'get')));
             if ('' === $value) {
-                $defaultValue = $this->reflectionClass->getProperty(lcfirst($funcName))->getDefaultValue();
-                $this->updateParsedData(Str::snake($funcName), $defaultValue);
-                return $defaultValue;
+                return $this->reflectionClass->getProperty(lcfirst($funcName))->getDefaultValue();
             }
             return $value;
         }
@@ -110,49 +90,13 @@ abstract class Pojo implements Arrayable
     }
 
     /**
-     * @return ServerRequestInterface
-     */
-    private function getRequest(): ServerRequestInterface
-    {
-        return Context::get(ServerRequestInterface::class);
-    }
-
-    /**
-     * @return array
-     */
-    private function getInputData(): array
-    {
-        return $this->storeParsedData(function () {
-            $request = $this->getRequest();
-            if (is_array($request->getParsedBody())) {
-                $data = $request->getParsedBody();
-            } else {
-                $data = [];
-            }
-            return array_merge($data, $request->getQueryParams());
-        });
-    }
-
-    /**
-     * @param callable $callback
-     * @return mixed
-     */
-    private function storeParsedData(callable $callback): mixed
-    {
-        if (!Context::has($this->contextKeys['parsedData'])) {
-            return Context::set($this->contextKeys['parsedData'], $callback());
-        }
-        return Context::get($this->contextKeys['parsedData']);
-    }
-
-    /**
      * @param mixed $key
      * @param mixed|null $data
      * @return void
      */
-    private function updateParsedData(mixed $key, mixed $data = null): void
+    protected function updateParsedData(mixed $key, mixed $data = null): void
     {
-        Context::override($this->contextKeys['parsedData'], function ($old)use ($key, $data) {
+        Context::override($this->contextkeys['parsedData'], function ($old)use ($key, $data) {
             if (is_array($key)) {
                 $updateData = $key;
             } else {
@@ -160,5 +104,10 @@ abstract class Pojo implements Arrayable
             }
             return array_merge($old ?? [], $updateData);
         });
+    }
+
+    public function authorize(): bool
+    {
+        return true;
     }
 }
