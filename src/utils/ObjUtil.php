@@ -76,6 +76,9 @@ class ObjUtil {
                     $propertyValue = 0;
                 }
             }
+            if (is_null($propertyValue) && Str::contains($property->getDocComment(), ['string'])) {
+                $propertyValue = '';
+            }
             if (is_null($propertyValue)) {
                 continue;
             }
