@@ -75,7 +75,7 @@ abstract class Pojo extends FormRequest
     {
         if (Str::startsWith($name, 'get')) {
             $funcName = Str::after($name, 'get');
-            $value = $this->input(Str::snake(Str::after($name, 'get')));
+            $value = $this->input(Str::snake(Str::after($name, 'get')),'');
             if ('' === $value) {
                 return $this->reflectionClass->getProperty(lcfirst($funcName))->getDefaultValue();
             }
