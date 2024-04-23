@@ -55,6 +55,7 @@ abstract class Pojo extends FormRequest
     {
         $inputData = $this->getInputData();
         foreach ($inputData as $key => $value) {
+            $key = lcfirst(Str::studly($key));
             if ($value == '') {
                 // 前端如果传''，则取属性默认值
                 $value = $this->reflectionClass->getProperty($key)->getDefaultValue();
