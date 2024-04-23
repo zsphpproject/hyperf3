@@ -49,18 +49,19 @@ abstract class Pojo extends FormRequest
      * 通过中间件触发
      * 每次请求过来的时候，set 数据
      * @return void
-     * @throws ReflectionException
      */
     public function setData(): void
     {
         $inputData = $this->getInputData();
-        foreach ($inputData as $key => $value) {
-            $key = lcfirst(Str::studly($key));
-            if ($value == '') {
-                // 前端如果传''，则取属性默认值
-                $value = $this->reflectionClass->getProperty($key)->getDefaultValue();
+        foreach ($this->properties as $property) {
+            $propertySnakeName = Str::snake($property->getName());
+            if (!isset($inputData[$propertySnakeName]) || $inputData[$propertySnakeName] == '') {
+                // 没传或者传空字符串，则用属性默认值
+                $value = $property->getDefaultValue();
+            } else {
+                $value = $inputData[$propertySnakeName];
             }
-            $this->storeRequestProperty($key, $value);
+            $this->storeRequestProperty($property->getName(), $value);
         }
     }
 }
