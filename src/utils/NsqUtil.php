@@ -20,4 +20,9 @@ class NsqUtil {
         $nsqData["type"] = $type;
         $this->nsq->publish($topic, json_encode($nsqData));
     }
+
+
+    public function publishMany(string $topic,array $nsqData,float $ttl = 0.0): void {
+        $this->nsq->publish($topic, $nsqData,$ttl);
+    }
 }
