@@ -35,6 +35,7 @@
         "hyperf/paginator": "~3.0.0",
         "hyperf/process": "~3.0.0",
         "hyperf/redis": "~3.0.0",
+        "hyperf/validation": "^3.0",
         "overtrue/easy-sms": "^2.4",
         "phpdocumentor/reflection-docblock": "^5.3"
     },
