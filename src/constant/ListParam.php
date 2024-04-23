@@ -3,12 +3,9 @@
 namespace Zsgogo\constant;
 
 /**
- * @method getPage()
- * @method setPage(int $page)
- * @method getSize
- * @method setSize(int $size)
- * @method getSort()
- * @method setSort(string $sort)
+ * @property int $page
+ * @property int $size
+ * @property string $sort
  */
 trait ListParam {
 
