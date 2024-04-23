@@ -10,7 +10,6 @@ use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
-use App\common\constant\ErrorNums;
 use RuntimeException;
 
 abstract class Pojo extends FormRequest
@@ -46,7 +45,7 @@ abstract class Pojo extends FormRequest
         foreach ($properties as $property) {
             $propertySnakeName = Str::snake($property->getName());
             $inputData = $this->input($propertySnakeName);
-            if ('' === $inputData) {
+            if ('' === $inputData || null === $inputData) {
                 $data[$propertySnakeName] = $property->getDefaultValue();
             } else {
                 $data[$propertySnakeName] = $inputData;
