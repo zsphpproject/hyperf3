@@ -59,7 +59,13 @@ abstract class Pojo extends FormRequest
                 // 没传或者传空字符串，则用属性默认值
                 $value = $property->getDefaultValue();
             } else {
-                $value = $inputData[$propertySnakeName];
+                $value = match ($property->getType()->getName()) {
+                    'int' => (int)$inputData[$propertySnakeName],
+                    'float' => (float)$inputData[$propertySnakeName],
+                    'double' => (double)$inputData[$propertySnakeName],
+                    'bool' => (bool)$inputData[$propertySnakeName],
+                    default => $inputData[$propertySnakeName],
+                };
             }
             $this->storeRequestProperty($property->getName(), $value);
         }
