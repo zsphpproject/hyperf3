@@ -3,8 +3,6 @@
 namespace Zsgogo\model;
 
 use App\common\constant\Common;
-use Hyperf\Contract\LengthAwarePaginatorInterface;
-use Hyperf\Database\Model\Builder;
 use Hyperf\Database\Model\Collection;
 use Hyperf\DbConnection\Model\Model;
 use Hyperf\Paginator\Paginator;

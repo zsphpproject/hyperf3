@@ -7,7 +7,6 @@ use Hyperf\Stringable\Str;
 use Hyperf\Validation\Request\FormRequest;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionProperty;
 
 abstract class Pojo extends FormRequest
