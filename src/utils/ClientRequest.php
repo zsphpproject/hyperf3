@@ -82,7 +82,7 @@ class ClientRequest {
     public function request(string $baseurl,string $path = "",string $method = "post",array $param = [],array $headers = []): mixed {
         $client = new Client([
             "base_uri" => $baseurl,
-            "timeout" => 5.0
+            "timeout" => 10.0
         ]);
 
         $option[RequestOptions::JSON] = [];
