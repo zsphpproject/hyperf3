@@ -47,7 +47,7 @@ class PoPoMiddleware implements MiddlewareInterface
                     }
                     $formRequest = $this->container->get($parameterType->getName());
                     if ($formRequest instanceof Pojo) {
-                        $formRequest->setData();
+                        $formRequest->setData($formRequest->all());
                     }
                 }
             }
